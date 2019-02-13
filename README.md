@@ -2,16 +2,16 @@
 
 [![GoDoc][1]][2] [![Discord][7]][8] [![MIT licensed][5]][6] [![Build Status][9]][10] [![Go Report Card][11]][12]
 
-[1]: https://godoc.org/github.com/perlin-network/life?status.svg
-[2]: https://godoc.org/github.com/perlin-network/life
+[1]: https://godoc.org/github.com/fendouhyz/life?status.svg
+[2]: https://godoc.org/github.com/fendouhyz/life
 [5]: https://img.shields.io/badge/license-MIT-blue.svg
 [6]: LICENSE
 [7]: https://shields.dougley.com/discord/458332417909063682.svg
 [8]: https://discord.gg/dMYfDPM
-[9]: https://travis-ci.org/perlin-network/life.svg?branch=master
-[10]: https://travis-ci.org/perlin-network/life
-[11]: https://goreportcard.com/badge/github.com/perlin-network/life
-[12]: https://goreportcard.com/report/github.com/perlin-network/life
+[9]: https://travis-ci.org/fendouhyz/life.svg?branch=master
+[10]: https://travis-ci.org/fendouhyz/life
+[11]: https://goreportcard.com/badge/github.com/fendouhyz/life
+[12]: https://goreportcard.com/report/github.com/fendouhyz/life
 
 **life** is a secure & fast WebAssembly VM built for decentralized applications, written in [Go](https://golang.org/) by Perlin Network.
 
@@ -34,7 +34,7 @@ export GO111MODULE=on
 go mod vendor
 
 # build test suite runner
-go build github.com/perlin-network/life/spec/test_runner
+go build github.com/fendouhyz/life/spec/test_runner
 
 # run official test suite
 python3 run_spec_tests.py /path/to/testsuite

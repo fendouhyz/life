@@ -7,9 +7,9 @@ import (
 	"math/bits"
 	"runtime/debug"
 
-	"github.com/perlin-network/life/compiler"
-	"github.com/perlin-network/life/compiler/opcodes"
-	"github.com/perlin-network/life/utils"
+	"github.com/fendouhyz/life/compiler"
+	"github.com/fendouhyz/life/compiler/opcodes"
+	"github.com/fendouhyz/life/utils"
 
 	"strings"
 
@@ -120,6 +120,18 @@ func NewVirtualMachine(
 		fmt.Println("Warning: JIT support is removed.")
 	}
 
+
+	/*
+		把wasm代码按照官方标准的Module载入自定义的Module的模块中
+		type Module struct {
+			Base                 *wasm.Module
+			FunctionNames        map[int]string
+			DisableFloatingPoint bool
+		}
+		自己定义了 functionID到name的映射
+		再次遇到这个FloatingPoint？？
+	*/
+
 	m, err := compiler.LoadModule(code)
 	if err != nil {
 		return nil, err
@@ -127,6 +139,20 @@ func NewVirtualMachine(
 
 	m.DisableFloatingPoint = config.DisableFloatingPoint
 
+	/*
+		CompileForInterpreter这个函数字面意思是为解释器进行编译
+		返回值为retCode []InterpreterCode 解释器代码
+		自定义的一种代码数据结构
+		type InterpreterCode struct {
+			NumRegs    int
+			NumParams  int
+			NumLocals  int
+			NumReturns int
+			Bytes      []byte
+			JITInfo    interface{}
+			JITDone    bool
+		}
+	*/
 	functionCode, err := m.CompileForInterpreter(gasPolicy)
 	if err != nil {
 		return nil, err

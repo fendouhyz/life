@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/perlin-network/life/exec"
+	"github.com/fendouhyz/life/exec"
 	"io/ioutil"
 )
 

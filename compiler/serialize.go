@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 
-	"github.com/perlin-network/life/compiler/opcodes"
+	"github.com/fendouhyz/life/compiler/opcodes"
 )
 
 // Serialize serializes a set of SSA-form instructions into a byte array
@@ -15,6 +15,10 @@ import (
 //
 // Types are erased in the generated code.
 // Example: float32/float64 are represented as uint32/uint64 respectively.
+
+/*
+	这里的Value ID 是指该指令的执行完后的栈顶编号是多少，从1开始，所以frame.Regs申请的空间是 n+1， n是最高用到的栈空间
+*/
 func (c *SSAFunctionCompiler) Serialize() []byte {
 	buf := &bytes.Buffer{}
 	insRelocs := make([]int, len(c.Code))
@@ -22,8 +26,13 @@ func (c *SSAFunctionCompiler) Serialize() []byte {
 
 	for i, ins := range c.Code {
 		insRelocs[i] = buf.Len()
-		binary.Write(buf, binary.LittleEndian, uint32(ins.Target))
+		binary.Write(buf, binary.LittleEndian, uint32(ins.Target)) //
 
+
+		/*
+			这里的Operands也就是ins.Values[i]类型是TyValueID，是Int64类型
+			具体是什么意思还有待讨论，目前认为字面意思是类型编号，比如int32代表着值是0
+		*/
 		switch ins.Op {
 		case "unreachable":
 			binary.Write(buf, binary.LittleEndian, opcodes.Unreachable)

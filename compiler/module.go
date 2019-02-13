@@ -8,8 +8,8 @@ import (
 	"github.com/go-interpreter/wagon/wasm"
 	//"github.com/go-interpreter/wagon/validate"
 	"github.com/go-interpreter/wagon/wasm/leb128"
-	"github.com/perlin-network/life/compiler/opcodes"
-	"github.com/perlin-network/life/utils"
+	"github.com/fendouhyz/life/compiler/opcodes"
+	"github.com/fendouhyz/life/utils"
 	"strings"
 )
 
@@ -171,14 +171,30 @@ func (m *Module) CompileWithNGen(gp GasPolicy, numGlobals uint64) (out string, r
 	return
 }
 
+/*
+	注意这是在自定义的Module里面的成员函数
+*/
 func (m *Module) CompileForInterpreter(gp GasPolicy) (_retCode []InterpreterCode, retErr error) {
 	defer utils.CatchPanic(&retErr)
 
 	ret := make([]InterpreterCode, 0)
-	importTypeIDs := make([]int, 0)
+	importTypeIDs := make([]int, 0)  //字面意思，导入类型的ID列表
 
 	if m.Base.Import != nil {
 		for i := 0; i < len(m.Base.Import.Entries); i++ {
+			/*
+				Entries == []ImportEntry
+				type ImportEntry struct {
+					ModuleName string // module name string
+					FieldName  string // field name string
+
+					// If Kind is Function, Type is a FuncImport containing the type index of the function signature
+					// If Kind is Table, Type is a TableImport containing the type of the imported table
+					// If Kind is Memory, Type is a MemoryImport containing the type of the imported memory
+					// If the Kind is Global, Type is a GlobalVarImport
+					Type Import
+				}
+			*/
 			e := &m.Base.Import.Entries[i]
 			if e.Type.Kind() != wasm.ExternalFunction {
 				continue

@@ -3,10 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/perlin-network/life/exec"
-	"github.com/perlin-network/life/platform"
+	"github.com/fendouhyz/life/exec"
+	"github.com/fendouhyz/life/platform"
 	"io/ioutil"
-	"strconv"
 	"time"
 )
 
@@ -16,6 +15,11 @@ type Resolver struct {
 }
 
 // ResolveFunc defines a set of import functions that may be called within a WebAssembly module.
+/*
+	定义了一个入口函数的集合，这些函数被调用的时候，会加载进一个WebAssembly module里面
+	1. 未来在此加入访问block数据的api
+	2. 未来还需要扩展一些string等高级数据类型，类似本体的做法，（不确定是否在这里扩展）
+*/
 func (r *Resolver) ResolveFunc(module, field string) exec.FunctionImport {
 	fmt.Printf("Resolve func: %s %s\n", module, field)
 	switch module {
@@ -69,23 +73,34 @@ func main() {
 	noFloatingPointFlag := flag.Bool("no-fp", false, "disable floating point")
 	flag.Parse()
 
+
+
 	// Read WebAssembly *.wasm file.
-	input, err := ioutil.ReadFile(flag.Arg(0))
+	//input, err := ioutil.ReadFile(flag.Arg(0))
+	/*
+		这里注释和原读入文件，为了测试方便
+	*/
+	input, err := ioutil.ReadFile("./tests/imports.wasm")
 	if err != nil {
 		panic(err)
 	}
 
 	// Instantiate a new WebAssembly VM with a few resolved imports.
+	//实例化一个虚拟机
 	vm, err := exec.NewVirtualMachine(input, exec.VMConfig{
 		DefaultMemoryPages:   128,
 		DefaultTableSize:     65536,
-		DisableFloatingPoint: *noFloatingPointFlag,
+		DisableFloatingPoint: *noFloatingPointFlag,  //这里目前还不太动这个flag的意思，字面意思是漂流点？浮点指针？指向浮点数的指针？
 	}, new(Resolver), nil)
 
 	if err != nil {
 		panic(err)
 	}
 
+	/*
+		pmFlag是polymerase的开关，命令行读取，具体什么意思？字面意思是聚合酶
+		AOTCompile以及AOTService又是什么意思呢？
+	*/
 	if *pmFlag {
 		compileStartTime := time.Now()
 		fmt.Println("[Polymerase] Compilation started.")
@@ -100,6 +115,10 @@ func main() {
 	}
 
 	// Get the function ID of the entry function to be executed.
+	/*
+		1.entryFunctionFlag是从命令行获取的，如果没有读到，自动命令entryID为0
+		2.这里是为了方便自定义入口函数
+	*/
 	entryID, ok := vm.GetFunctionExport(*entryFunctionFlag)
 	if !ok {
 		fmt.Printf("Entry function %s not found; starting from 0.\n", *entryFunctionFlag)
@@ -110,6 +129,10 @@ func main() {
 
 	// If any function prior to the entry function was declared to be
 	// called by the module, run it first.
+	/*
+		在这个module里面，如果有优先级高于入口函数的function，先运行他
+		！注意PrintStackTrace这个函数，调试很有用
+	*/
 	if vm.Module.Base.Start != nil {
 		startID := int(vm.Module.Base.Start.Index)
 		_, err := vm.Run(startID)
@@ -119,14 +142,15 @@ func main() {
 		}
 	}
 	var args []int64
-	for _, arg := range flag.Args()[1:] {
-		fmt.Println(arg)
-		if ia, err := strconv.Atoi(arg); err != nil {
-			panic(err)
-		} else {
-			args = append(args, int64(ia))
-		}
-	}
+	/*这里注释了原有的代码，因为不直接从命令行读入了*/
+	//for _, arg := range flag.Args()[1:] {
+	//	fmt.Println(arg)
+	//	if ia, err := strconv.Atoi(arg); err != nil {
+	//		panic(err)
+	//	} else {
+	//		args = append(args, int64(ia))
+	//	}
+	//}
 
 	// Run the WebAssembly module's entry function.
 	ret, err := vm.Run(entryID, args...)

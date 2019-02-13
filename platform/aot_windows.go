@@ -1,7 +1,7 @@
 package platform
 
 import (
-	"github.com/perlin-network/life/exec"
+	"github.com/fendouhyz/life/exec"
 )
 
 type AOTContext struct {
